@@ -144,7 +144,7 @@ class deviceLibrary {
 				supportsStandardRGB : true,
 				supportsBackgroundRGB : false,
 				supportsPerLED: false,
-				supportsSegments: false,
+				supportsSegments: true,
 				vLedPositions : [ [0, 0] ],
 				vLedNames : [ "Main Zone" ],
 				size : [ 1, 1 ],
