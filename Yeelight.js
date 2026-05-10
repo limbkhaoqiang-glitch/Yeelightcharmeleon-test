@@ -84,21 +84,36 @@ let lightOff = false;
 function sendColors(overrideColor) {
 	const RGBData = grabColors(overrideColor);
 
-	if(lastData !== RGBData) {
-		if(RGBData === 0) {
-			Yeelight.setDeviceBrightness(1);
-			lightOff = true;
-		} else if (lightOff) {
-			Yeelight.setDeviceBrightness(100);
-			lightOff = false;
-		}
+	// Extract R, G, B for a threshold check (Optional but recommended)
+	const r = (RGBData >> 16) & 0xFF;
+	const g = (RGBData >> 8) & 0xFF;
+	const b = RGBData & 0xFF;
 
-		// Since we are single zone, we use standard RGB mode
-		Yeelight.getSupportsBackgroundRGB() ? Yeelight.setBGRGB(RGBData) : Yeelight.setRGB(RGBData);
+	// Only communicate if the color has changed to save network bandwidth
+	if(lastData !== RGBData) {
+		
+		// If the color is essentially black (below threshold of 2)
+		if(r < 2 && g < 2 && b < 2) { 
+			if (!lightOff) {
+				Yeelight.setDevicePower(false); 
+				lightOff = true;
+				device.log("Signal is Black: Cutting Hardware Power.");
+			}
+		} else {
+			// If we were off and now have color, power back on first
+			if (lightOff) {
+				Yeelight.setDevicePower(true);
+				lightOff = false;
+				device.pause(60); // Essential delay to let the Wi-Fi chip wake up
+			}
+			
+			// Send the smoothed color command (Wiz-style)
+			Yeelight.getSupportsBackgroundRGB() ? Yeelight.setBGRGB(RGBData) : Yeelight.setRGB(RGBData);
+		}
+		
 		lastData = RGBData;
 	}
 }
-
 
 function grabColors(overrideColor) {
 	let r, g, b;
