@@ -256,23 +256,11 @@ class deviceLibrary {
 	constructor() {
 		this.modelDict = {
 			" lamp15" : "Monitor Lightbar Pro",
-			" CubeMatrix" : "Cube Matrix",
-			" CubePanel" : "Cube Panel",
-			" CubeSpot"  : "Cube Spot",
-			" CubeLite"  : "Cube Lite",
-			" RaysLight" : "Beam RGBIC Lightbar",
-			" Chameleon2" : "Obsid RGBIC Light Strip",
 			" strip8" : "LED Light Strip Pro" 
 		};
 
 		this.reverseModelDict = {
 			"Monitor Lightbar Pro": " lamp15",
-			"Cube Matrix" : " CubeMatrix",
-			"Cube Panel": " CubePanel",
-			"Cube Spot" :  " CubeSpot",
-			"Cube Lite" : " CubeLite",
-			"Beam RGBIC Lightbar" : " RaysLight",
-			"Obsid RGBIC Light Strip" : " Chameleon2",
 			"LED Light Strip Pro" : " strip8" 
 		};
 
@@ -301,84 +289,6 @@ class deviceLibrary {
 				DeviceMaxLedLimit: 8,
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/obsid-rgbic-light-strip.png" 
 			},			
-			"Cube Matrix" : {
-				usesComponents: true,
-				supportsStandardRGB : true,
-				supportsBackgroundRGB : false,
-				supportsPerLED: true,
-				supportsSegments: false,
-				vLedPositions : [ ],
-				vLedNames : [ ],
-				size : [ 1, 1 ],
-				defaultCount: 1,
-				DeviceMaxLedLimit: 25 * 6,
-				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/cube-matrix.png"
-			},
-			"Cube Panel" : {
-				usesComponents: true,
-				supportsStandardRGB : true,
-				supportsBackgroundRGB : false,
-				supportsPerLED: true,
-				supportsSegments: false,
-				vLedPositions : [ ],
-				vLedNames : [ ],
-				size : [ 1, 1 ],
-				defaultCount: 1,
-				DeviceMaxLedLimit: 25 * 6,
-				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/cube-panel.png"
-			},
-			"Cube Spot" : {
-				usesComponents: true,
-				supportsStandardRGB : true,
-				supportsBackgroundRGB : false,
-				supportsPerLED: true,
-				supportsSegments: false,
-				vLedPositions : [ ],
-				vLedNames : [ ],
-				size : [ 1, 1 ],
-				defaultCount: 1,
-				DeviceMaxLedLimit: 25 * 6,
-				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/cube-spot.png"
-			},
-			"Cube Lite" : {
-				usesComponents: true,
-				supportsStandardRGB : true,
-				supportsBackgroundRGB : false,
-				supportsPerLED: true,
-				supportsSegments: false,
-				vLedPositions : [ ],
-				vLedNames : [ ],
-				size : [ 1, 1 ],
-				defaultCount: 100,
-				DeviceMaxLedLimit: 100,
-				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/cube-matrix.png"
-			},
-			"Obsid RGBIC Light Strip" : {
-				usesComponents: true,
-				supportsStandardRGB : true,
-				supportsBackgroundRGB : false,
-				supportsPerLED: true,
-				supportsSegments: false,
-				vLedPositions : [ ],
-				vLedNames : [ ],
-				size : [ 1, 1 ],
-				defaultCount: 60,
-				DeviceMaxLedLimit: 120,
-				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/obsid-rgbic-light-strip.png"
-			},
-			"Beam RGBIC Lightbar" : {
-				usesComponents: true,
-				supportsStandardRGB : true,
-				supportsBackgroundRGB : false,
-				supportsPerLED: true,
-				supportsSegments: false,
-				vLedPositions : [ ],
-				vLedNames : [ ],
-				size : [ 1, 1 ],
-				defaultCount: 168,
-				DeviceMaxLedLimit: 168,
-				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/beam-rgbic-light-bar.png"
-			},
 			"Yeelight Device" : {
 				usesComponents: false,
 				supportsStandardRGB : true,
