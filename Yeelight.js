@@ -270,7 +270,7 @@ class deviceLibrary {
 			" CubeLite"  : "Cube Lite",
 			" RaysLight" : "Beam RGBIC Lightbar",
 			" Chameleon2" : "Obsid RGBIC Light Strip",
-			" strip6" : "LED Light Strip Pro" 
+			" strip8" : "LED Light Strip Pro" 
 		};
 
 		this.reverseModelDict = {
@@ -281,7 +281,7 @@ class deviceLibrary {
 			"Cube Lite" : " CubeLite",
 			"Beam RGBIC Lightbar" : " RaysLight",
 			"Obsid RGBIC Light Strip" : " Chameleon2",
-			"LED Light Strip Pro" : " strip6" 
+			"LED Light Strip Pro" : " strip8" 
 		};
 
 		this.modelLibrary = {
