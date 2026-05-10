@@ -82,36 +82,20 @@ let lastData = 0;
 let lightOff = false;
 
 function sendColors(overrideColor) {
+	const RGBData = grabColors(overrideColor);
 
-	if(Yeelight.getSupportsPerLED() && (vLedPositions.length > 1  || device.getLedCount() > 1)) {
-		//Fancy little catch to ensure that we control any devices we can.
-		//PERLED devices without a dict are forced to single zone control.
-		if(!Yeelight.getIsInDirectMode()) {
-			udpServer.setIDToCheckFor(Yeelight.getPacketIDX());
-			udpServer.setCallbackFunction((msg) => Yeelight.checkPacketResponse(msg));
-			Yeelight.setDirectMode();
-			device.pause(1000);
-			device.log("DIRECT MODE ETA NOW");
-
-			return;
+	if(lastData !== RGBData) {
+		if(RGBData === 0) {
+			Yeelight.setDeviceBrightness(1);
+			lightOff = true;
+		} else if (lightOff) {
+			Yeelight.setDeviceBrightness(100);
+			lightOff = false;
 		}
 
-		Yeelight.setRGBPerLED(Yeelight.getUsesComponents() ? grabComponentColors(overrideColor) : grabIndividualColors(overrideColor));
-	} else {
-		const RGBData = grabColors(overrideColor);
-		//Single Zone Devices seem to respond a tad more slowly. This should help compensate.
-
-		if(lastData !== RGBData) {
-			if(RGBData === 0) {
-				Yeelight.setDeviceBrightness(1);
-				lightOff = true;
-			} else if (lightOff) {
-				Yeelight.setDeviceBrightness(100);
-			}
-
-			Yeelight.getSupportsBackgroundRGB() ? Yeelight.setBGRGB(RGBData) : Yeelight.setRGB(RGBData);
-			lastData = RGBData;
-		}
+		// Since we are single zone, we use standard RGB mode
+		Yeelight.getSupportsBackgroundRGB() ? Yeelight.setBGRGB(RGBData) : Yeelight.setRGB(RGBData);
+		lastData = RGBData;
 	}
 }
 
@@ -278,7 +262,7 @@ class deviceLibrary {
 			" CubeLite"  : "Cube Lite",
 			" RaysLight" : "Beam RGBIC Lightbar",
 			" Chameleon2" : "Obsid RGBIC Light Strip",
-			" strip6" : "LED Light Strip Pro" 
+			" strip8" : "LED Light Strip Pro" 
 		};
 
 		this.reverseModelDict = {
@@ -289,7 +273,7 @@ class deviceLibrary {
 			"Cube Lite" : " CubeLite",
 			"Beam RGBIC Lightbar" : " RaysLight",
 			"Obsid RGBIC Light Strip" : " Chameleon2",
-			"LED Light Strip Pro" : " strip6" 
+			"LED Light Strip Pro" : " strip8" 
 		};
 
 		this.modelLibrary = {
@@ -308,7 +292,7 @@ class deviceLibrary {
 				usesComponents: false,
 				supportsStandardRGB : true,
 				supportsBackgroundRGB : false,
-				supportsPerLED: true,
+				supportsPerLED: false,
 				supportsSegments: true,
 				vLedPositions : [ [0, 0] ],
 				vLedNames : [ "Main Zone" ],
