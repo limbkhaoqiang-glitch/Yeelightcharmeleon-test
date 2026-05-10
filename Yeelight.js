@@ -303,7 +303,7 @@ class deviceLibrary {
 				supportsPerLED: true,
 				supportsSegments: true,
 				vLedPositions : [ [0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0] ],
-				vLedNames : [ "Main Zone" ],
+				vLedNames : [ "Segment 1", "Segment 2", "Segment 3", "Segment 4", "Segment 5", "Segment 6", "Segment 7", "Segment 8" ],
 				size : [ 8, 1 ],
 				defaultCount: 8,
 				DeviceMaxLedLimit: 8,
