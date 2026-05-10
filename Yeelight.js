@@ -297,12 +297,12 @@ class deviceLibrary {
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/monitor-light-bar-pro.png"
 			},
 			"LED Light Strip Pro" : {
-				usesComponents: true,
+				usesComponents: false,
 				supportsStandardRGB : true,
 				supportsBackgroundRGB : false,
-				supportsPerLED: true,
+				supportsPerLED: false,
 				supportsSegments: true,
-				vLedPositions : [ [] ],
+				vLedPositions : [ ],
 				vLedNames : [ "Main Zone" ],
 				size : [ 8, 1 ],
 				defaultCount: 1,
