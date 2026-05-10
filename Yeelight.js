@@ -297,15 +297,15 @@ class deviceLibrary {
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/monitor-light-bar-pro.png"
 			},
 			"LED Light Strip Pro" : {
-				usesComponents: true,
+				usesComponents: false,
 				supportsStandardRGB : true,
 				supportsBackgroundRGB : false,
 				supportsPerLED: true,
 				supportsSegments: true,
-				vLedPositions : [ [0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0] ],
-				vLedNames : [ "Segment 1", "Segment 2", "Segment 3", "Segment 4", "Segment 5", "Segment 6", "Segment 7", "Segment 8" ],
-				size : [ 8, 1 ],
-				defaultCount: 8,
+				vLedPositions : [ [0, 0] ],
+				vLedNames : [ "Main Zone" ],
+				size : [ 1, 1 ],
+				defaultCount: 1,
 				DeviceMaxLedLimit: 8,
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/obsid-rgbic-light-strip.png" 
 			},			
