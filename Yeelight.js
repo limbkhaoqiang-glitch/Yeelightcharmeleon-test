@@ -305,7 +305,7 @@ class deviceLibrary {
 				vLedPositions : [ [0, 0] ],
 				vLedNames : [ "Main Zone" ],
 				size : [ 8, 1 ],
-				defaultCount: 1,
+				defaultCount: 8,
 				DeviceMaxLedLimit: 8,
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/obsid-rgbic-light-strip.png" 
 			},			
