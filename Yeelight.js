@@ -7,46 +7,31 @@ export function Publisher() { return "WhirlwindFX"; }
 export function Size() { return [48, 48]; }
 export function DefaultPosition() {return [75, 70]; }
 export function DefaultScale(){return 1.0;}
-/* global
-discovery:readonly
-controller:readonly
-shutdownColor:readonly
-LightingMode:readonly
-forcedColor:readonly
-*/
+
 export function ControllableParameters() {
 	return [
-		{"property":"shutdownColor", "group":"lighting", "label":"Shutdown Color", "min":"0", "max":"360", "type":"color", "default":"#009bde"},
+		{"property":"shutdownColor", "group":"lighting", "label":"Shutdown Color", "type":"color", "default":"#009bde"},
 		{"property":"LightingMode", "group":"lighting", "label":"Lighting Mode", "type":"combobox", "values":["Canvas", "Forced"], "default":"Canvas"},
-		{"property":"forcedColor", "group":"lighting", "label":"Forced Color", "min":"0", "max":"360", "type":"color", "default":"#009bde"},
+		{"property":"forcedColor", "group":"lighting", "label":"Forced Color", "type":"color", "default":"#009bde"},
 	];
 }
 
 let udpServer;
-
-let DeviceMaxLedLimit = 25 * 6;
+let DeviceMaxLedLimit = 1;
 let defaultCount = 0;
 export function DefaultComponentBrand() { return "Yeelight";}
-let vLedNames = [ "LED 1" ];
+let vLedNames = [ "Main Zone" ];
 let vLedPositions = [ [0, 0] ];
 
-export function ledNames() {
-	return vLedNames;
-}
+export function ledNames() { return vLedNames; }
+export function ledPositions() { return vLedPositions; }
 
-export function ledPositions() {
-	return vLedPositions;
-}
-
-//Channel Name, Led Limit
-const ChannelArray = [ ["Channel 1", DeviceMaxLedLimit] ];
+const ChannelArray = [ ["Channel 1", 1] ];
 
 export function Initialize() {
 	Yeelight.fetchUDPToken();
 	fetchDeviceConfig();
 	device.setName(YeelightDeviceLibrary.getDeviceNameFromModel(controller.model));
-	Yeelight.setSupportsBackgroundRGB(controller.supportsBackgroundRGB);
-	Yeelight.setSupportsPerLED(controller.supportsPerLED);
 }
 
 export function Render() {
@@ -54,12 +39,9 @@ export function Render() {
 		if(!Yeelight.getIsInitialized()) {
 			deviceInitialization();
 			udpServer.setIDToCheckFor(1);
-
 			return;
 		}
-
 		sendColors();
-
 		checkTimeSinceLastPacket();
 	}
 }
@@ -67,7 +49,7 @@ export function Render() {
 export function Shutdown(SystemSuspending) {
 	if(SystemSuspending){
 		sendColors("#000000");
-	}else{
+	} else {
 		sendColors(shutdownColor);
 	}
 }
@@ -86,33 +68,28 @@ function sendColors(overrideColor) {
 
 	if(lastData !== RGBData) {
 		if(RGBData === 0) {
-			Yeelight.setDeviceBrightness(1);
+			Yeelight.setDevicePower(false); 
 			lightOff = true;
-		} else if (lightOff) {
-			Yeelight.setDeviceBrightness(100);
-			lightOff = false;
+		} else {
+			if (lightOff) {
+				Yeelight.setDevicePower(true);
+				lightOff = false;
+			}
+			Yeelight.getSupportsBackgroundRGB() ? Yeelight.setBGRGB(RGBData) : Yeelight.setRGB(RGBData);
 		}
-
-		// Since we are single zone, we use standard RGB mode
-		Yeelight.getSupportsBackgroundRGB() ? Yeelight.setBGRGB(RGBData) : Yeelight.setRGB(RGBData);
 		lastData = RGBData;
 	}
 }
 
-
 function grabColors(overrideColor) {
 	let r, g, b;
 
-	if (overrideColor) {
-		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(overrideColor);
-		r = parseInt(result[1], 16);
-		g = parseInt(result[2], 16);
-		b = parseInt(result[3], 16);
-	} else if (LightingMode === "Forced") {
-		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(forcedColor);
-		r = parseInt(result[1], 16);
-		g = parseInt(result[2], 16);
-		b = parseInt(result[3], 16);
+	if (overrideColor || LightingMode === "Forced") {
+		const targetHex = overrideColor || forcedColor;
+		const rgbArray = hexToRgb(targetHex);
+		r = rgbArray[0];
+		g = rgbArray[1];
+		b = rgbArray[2];
 	} else {
 		const col = device.color(0, 0);
 		r = col[0];
@@ -120,134 +97,20 @@ function grabColors(overrideColor) {
 		b = col[2];
 	}
 
-	// Optimized Bitwise Formula for maximum accuracy
+	// Clamp values to ensure they stay within 0-255
+	r = Math.min(255, Math.max(0, Math.round(r)));
+	g = Math.min(255, Math.max(0, Math.round(g)));
+	b = Math.min(255, Math.max(0, Math.round(b)));
+
 	return (r << 16) | (g << 8) | b;
 }
 
-function grabIndividualColors(overrideColor) {
-	let RGBData = "";
-
-	for(let iIdx = 0; iIdx < vLedPositions.length; iIdx++) {
-		let col;
-		const iPxX = vLedPositions[iIdx][0];
-		const iPxY = vLedPositions[iIdx][1];
-
-		if(overrideColor) {
-			col = hexToRgb(overrideColor);
-		} else if (LightingMode === "Forced") {
-			col = hexToRgb(forcedColor);
-		} else {
-			col = device.color(iPxX, iPxY);
-		}
-		const fixedCol = (col[0] * 65536) + (col[1] * 256) + col[2];
-		const asciiColor = encodeColorToASCII(fixedCol);
-		RGBData += asciiColor;
-	}
-
-	return RGBData;
-}
-
-function grabComponentColors(overrideColor) {
-	let RGBData = [];
-	let finalRGBData = "";
-
-	if(device.getLedCount() === 0) {
-		const pulseColor = device.getChannelPulseColor(ChannelArray[0][0]);
-		RGBData = device.createColorArray(pulseColor, defaultCount, "Inline", "RGB");
-	} else if (overrideColor) {
-		RGBData = device.createColorArray(overrideColor, device.channel(ChannelArray[0][0]).LedCount(), "Inline", "RGB");
-	} else {
-		RGBData = device.channel(ChannelArray[0][0]).getColors("Inline", "RGB");
-	}
-
-
-	for(let bytes = 0; bytes < RGBData.length/3; bytes++) {
-		const fixedCol = (RGBData[bytes * 3] * 65536) + (RGBData[bytes * 3 + 1] * 256) + RGBData[bytes * 3 + 2];
-		const asciiColor = encodeColorToASCII(fixedCol);
-		finalRGBData += asciiColor;
-	}
-
-	return finalRGBData;
-}
-
-function SetupChannels() {
-	device.SetLedLimit(DeviceMaxLedLimit);
-
-	for(let i = 0; i < ChannelArray.length; i++) {
-		device.addChannel(ChannelArray[i][0], ChannelArray[i][1], defaultCount);
-	}
-}
-
-function fetchDeviceConfig() {
-	const deviceConfig = YeelightDeviceLibrary.getModelLayout(controller.model);
-	vLedNames = deviceConfig.vLedNames;
-	vLedPositions = deviceConfig.vLedPositions;
-	defaultCount = deviceConfig.defaultCount;
-	DeviceMaxLedLimit = deviceConfig.DeviceMaxLedLimit;
-
-	Yeelight.setUsesComponents(deviceConfig.usesComponents);
-	Yeelight.setSupportsStandardRGB(deviceConfig.supportsStandardRGB);
-	Yeelight.setSupportsBackgroundRGB(deviceConfig.supportsBackgroundRGB);
-	Yeelight.setSupportsPerLED(deviceConfig.supportsPerLED);
-	Yeelight.setSupportsSegments(deviceConfig.supportsSegments);
-	device.SetIsSubdeviceController(deviceConfig.usesComponents);
-	device.setControllableLeds(deviceConfig.vLedNames, deviceConfig.vLedPositions);
-	device.setSize(deviceConfig.size);
-	device.setImageFromUrl(deviceConfig.imageURL);
-
-	if(Yeelight.getUsesComponents()) {
-		SetupChannels();
-	}
-}
-
-function checkTimeSinceLastPacket() {
-	if(Date.now() - checkTimeSinceLastPacket.lastPollTime < 9000) {
-		return;
-	}
-
-	Yeelight.UDPKeepalive();
-	checkTimeSinceLastPacket.lastPollTime = Date.now();
-}
-
 function hexToRgb(hex) {
+	const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+	hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
 	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-	const colors = [];
-	colors[0] = parseInt(result[1], 16);
-	colors[1] = parseInt(result[2], 16);
-	colors[2] = parseInt(result[3], 16);
-
-	return colors;
+	return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
 }
-
-function encodeColorToASCII(color) {
-	let encodedData = "";
-
-	let totalBytes = Math.floor(color / 64);
-	color = color % 64;
-
-	encodedData += asciiTable[Math.floor(totalBytes / 4096)];
-	totalBytes = totalBytes%4096;
-
-	encodedData += asciiTable[Math.floor(totalBytes / 64)];
-
-	totalBytes = totalBytes%64;
-
-	encodedData += asciiTable[totalBytes];
-	encodedData += asciiTable[color];
-
-	return encodedData;
-}
-
-const asciiTable = [
-	"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
-	"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-	"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o",
-	"p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-	"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-	"+", "/"
-];
-//Kicking, screaming, crying, encode to ASCII
-
 // -------------------------------------------<( Discovery Service )>--------------------------------------------------
 
 let UDPServer;
@@ -281,12 +144,12 @@ class deviceLibrary {
 				supportsStandardRGB : true,
 				supportsBackgroundRGB : false,
 				supportsPerLED: false,
-				supportsSegments: true,
+				supportsSegments: false,
 				vLedPositions : [ [0, 0] ],
 				vLedNames : [ "Main Zone" ],
 				size : [ 1, 1 ],
 				defaultCount: 1,
-				DeviceMaxLedLimit: 8,
+				DeviceMaxLedLimit: 1,
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/obsid-rgbic-light-strip.png" 
 			},			
 			"Yeelight Device" : {
@@ -447,12 +310,12 @@ class YeelightProtocol {
 	 *  At current is only used to ensure we properly pop into direct mode for PERLED.
 	 */
 	checkPacketResponse(msg) {
-
-		if(msg.data.includes(`"\id\":${udpServer.getIDToCheck()}`) && msg.data.includes(`\"result\":[\"ok\"]`)) {
-			device.log("GREAT SUCCESS!");
-			Yeelight.setIsInDirectMode(true);
-		}
-	}
+    // Check if the response ID matches and if the result is "ok"
+    if(msg.data.includes(`"id":${udpServer.getIDToCheck()}`) && msg.data.includes(`"ok"`)) {
+        device.log("Command acknowledged by Yeelight.");
+        Yeelight.setIsInDirectMode(true);
+    }
+}
 	/** Send a packet whilst ensuring we have an open udp Server and we increment packet idx.*/
 	sendPacket(packet) {
 		if(udpServer === undefined) {
