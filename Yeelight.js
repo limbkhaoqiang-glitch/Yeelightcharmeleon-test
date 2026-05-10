@@ -117,19 +117,27 @@ function sendColors(overrideColor) {
 
 
 function grabColors(overrideColor) {
-	let col;
+	let r, g, b;
 
-	if(overrideColor) {
-		col = hexToRgb(overrideColor);
+	if (overrideColor) {
+		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(overrideColor);
+		r = parseInt(result[1], 16);
+		g = parseInt(result[2], 16);
+		b = parseInt(result[3], 16);
 	} else if (LightingMode === "Forced") {
-		col = hexToRgb(forcedColor);
+		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(forcedColor);
+		r = parseInt(result[1], 16);
+		g = parseInt(result[2], 16);
+		b = parseInt(result[3], 16);
 	} else {
-		col = device.color(0, 0);
+		const col = device.color(0, 0);
+		r = col[0];
+		g = col[1];
+		b = col[2];
 	}
 
-	const fixedCol = (col[0] * 65536) + (col[1] * 256) + col[2];
-
-	return fixedCol;
+	// Optimized Bitwise Formula for maximum accuracy
+	return (r << 16) | (g << 8) | b;
 }
 
 function grabIndividualColors(overrideColor) {
@@ -270,7 +278,7 @@ class deviceLibrary {
 			" CubeLite"  : "Cube Lite",
 			" RaysLight" : "Beam RGBIC Lightbar",
 			" Chameleon2" : "Obsid RGBIC Light Strip",
-			" strip8" : "LED Light Strip Pro" 
+			" strip6" : "LED Light Strip Pro" 
 		};
 
 		this.reverseModelDict = {
@@ -281,7 +289,7 @@ class deviceLibrary {
 			"Cube Lite" : " CubeLite",
 			"Beam RGBIC Lightbar" : " RaysLight",
 			"Obsid RGBIC Light Strip" : " Chameleon2",
-			"LED Light Strip Pro" : " strip8" 
+			"LED Light Strip Pro" : " strip6" 
 		};
 
 		this.modelLibrary = {
