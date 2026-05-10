@@ -270,6 +270,7 @@ class deviceLibrary {
 			" CubeLite"  : "Cube Lite",
 			" RaysLight" : "Beam RGBIC Lightbar",
 			" Chameleon2" : "Obsid RGBIC Light Strip"
+			" Strip8" : "LED Light Strip Pro"
 		};
 
 		this.reverseModelDict = {
@@ -280,6 +281,7 @@ class deviceLibrary {
 			"Cube Lite" : " CubeLite",
 			"Beam RGBIC Lightbar" : " RaysLight",
 			"Obsid RGBIC Light Strip" : " Chameleon2"
+			"LED Light Strip Pro" : " Strip8"
 		};
 
 		this.modelLibrary = {
@@ -376,6 +378,26 @@ class deviceLibrary {
 				DeviceMaxLedLimit: 168,
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/beam-rgbic-light-bar.png"
 			},
+			"LED Light Strip Pro" : {
+    usesComponents: true,
+    supportsStandardRGB : true,
+    supportsBackgroundRGB : false,
+    supportsPerLED: true,
+    supportsSegments: true,
+    // Define 8 segments in a horizontal row
+    vLedPositions : [ 
+        [0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0] 
+    ],
+    vLedNames : [ 
+        "Segment 1", "Segment 2", "Segment 3", "Segment 4", 
+        "Segment 5", "Segment 6", "Segment 7", "Segment 8" 
+    ],
+    size : [ 8, 1 ],
+    defaultCount: 8,
+    DeviceMaxLedLimit: 8,
+    imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/obsid-rgbic-light-strip.png" 
+    // ^ You can replace the URL with a specific Light Strip Pro image if you have one
+},
 			"Yeelight Device" : {
 				usesComponents: false,
 				supportsStandardRGB : true,
