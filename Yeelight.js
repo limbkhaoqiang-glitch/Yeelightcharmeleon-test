@@ -297,7 +297,7 @@ class deviceLibrary {
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/monitor-light-bar-pro.png"
 			},
 			"LED Light Strip Pro" : {
-				usesComponents: false,
+				usesComponents: true,
 				supportsStandardRGB : true,
 				supportsBackgroundRGB : false,
 				supportsPerLED: true,
