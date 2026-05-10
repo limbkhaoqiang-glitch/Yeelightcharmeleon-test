@@ -82,6 +82,30 @@ let lastData = 0;
 let lightOff = false;
 
 function sendColors(overrideColor) {
+    // New Segmental Logic
+    if (Yeelight.getSupportsSegments() && !Yeelight.getSupportsPerLED()) {
+        let segmentData = [];
+        
+        for (let i = 0; i < vLedPositions.length; i++) {
+            let col;
+            if (overrideColor) {
+                col = hexToRgb(overrideColor);
+            } else {
+                // Grabs color from each of the 8 defined positions
+                col = device.color(vLedPositions[i][0], vLedPositions[i][1]);
+            }
+            // Combine R, G, B into the integer format Yeelight requires
+            const fixedCol = (col[0] << 16) | (col[1] << 8) | col[2];
+            segmentData.push(fixedCol);
+        }
+        
+        Yeelight.setSegmentRGB(segmentData);
+        return; // Exit so it doesn't run the single-zone code below
+    }
+
+    // ... existing code for Per-LED and Single Zone stays below ...
+}
+
 
 	if(Yeelight.getSupportsPerLED() && (vLedPositions.length > 1  || device.getLedCount() > 1)) {
 		//Fancy little catch to ensure that we control any devices we can.
@@ -270,6 +294,7 @@ class deviceLibrary {
 			" CubeLite"  : "Cube Lite",
 			" RaysLight" : "Beam RGBIC Lightbar",
 			" Chameleon2" : "Obsid RGBIC Light Strip"
+			" Chameleon1" : "LED Light Strip Pro"
 		};
 
 		this.reverseModelDict = {
@@ -280,6 +305,7 @@ class deviceLibrary {
 			"Cube Lite" : " CubeLite",
 			"Beam RGBIC Lightbar" : " RaysLight",
 			"Obsid RGBIC Light Strip" : " Chameleon2"
+			"LED Light Strip Pro" : " Chameleon1"
 		};
 
 		this.modelLibrary = {
@@ -363,12 +389,12 @@ class deviceLibrary {
 				DeviceMaxLedLimit: 120,
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/obsid-rgbic-light-strip.png"
 			},
-			"Chameleon Light Strip" : {
-    usesComponents: false,
-    supportsStandardRGB : true,
-    supportsBackgroundRGB : false,
-    supportsPerLED: false, 
-    supportsSegments: true, // This enables the segmental logic
+			"LED Light Strip Pro" : {
+ 			   usesComponents: false,
+			    supportsStandardRGB : true,
+			    supportsBackgroundRGB : false,
+			    supportsPerLED: false, 
+			    supportsSegments: true, // This enables the segmental logic
     // We define 8 segments across a 4x2 or 8x1 grid
     vLedPositions : [ [0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0] ],
     vLedNames : [ "Seg 1", "Seg 2", "Seg 3", "Seg 4", "Seg 5", "Seg 6", "Seg 7", "Seg 8" ],
@@ -529,6 +555,15 @@ class YeelightProtocol {
 		"method":"update_leds",
 		"params":["${RGBData}"],"token":"${this.getToken()}"}\r\n`);
 	}
+/** Sends 8 segment colors in a single packet */
+setSegmentRGB(segmentData) {
+    this.sendPacket(JSON.stringify({
+        "id": this.getPacketIDX(),
+        "method": "set_scene", 
+        "params": ["segment", ...segmentData],
+        "token": this.getToken()
+    }) + "\r\n");
+}
 	/** Fancy packet response checker to ensure that we actually do what we expect.
 	 *  At current is only used to ensure we properly pop into direct mode for PERLED.
 	 */
