@@ -302,10 +302,10 @@ class deviceLibrary {
 				supportsBackgroundRGB : false,
 				supportsPerLED: true,
 				supportsSegments: true,
-				vLedPositions : [ [0, 0] ],
+				vLedPositions : [ [] ],
 				vLedNames : [ "Main Zone" ],
 				size : [ 8, 1 ],
-				defaultCount: 8,
+				defaultCount: 1,
 				DeviceMaxLedLimit: 8,
 				imageURL : "https://assets.signalrgb.com/devices/brands/yeelight/obsid-rgbic-light-strip.png" 
 			},			
